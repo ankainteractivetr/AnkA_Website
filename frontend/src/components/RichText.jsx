@@ -42,7 +42,7 @@ export default function RichText({ text, className = '' }) {
     return (
         <div className={`prose-anka space-y-4 ${className}`}>
             {paragraphs.map((p, i) => (
-                <p key={i} className="leading-relaxed text-parchment/90">
+                <p key={i} className="leading-relaxed text-parchment/90 text-justify">
                     {renderInline(p)}
                 </p>
             ))}
