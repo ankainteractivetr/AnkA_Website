@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { api, resolveMedia } from '../../api/client';
+import ThumbImage from '../../components/ThumbImage';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function AboutEditor() {
@@ -206,8 +207,8 @@ export default function AboutEditor() {
             {images.map((img, idx) => (
               <div key={img.id} className="card-panel overflow-hidden">
                 <div className="aspect-video bg-ink-900 overflow-hidden">
-                  <img
-                    src={resolveMedia(img.image_url)}
+                  <ThumbImage
+                    image={img.image_url}
                     alt={img.alt_text}
                     className="w-full h-full object-cover"
                   />

@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { resolveMedia } from '../api/client';
+import { useEffect, useState } from 'react';
+import { resolveMedia, preloadImages } from '../api/client';
 import { useLanguage } from '../context/LanguageContext';
 import RichText from './RichText';
 import MediaViewer from './MediaViewer';
+import ThumbImage from './ThumbImage';
 
 export default function ProjectCard({ project }) {
     const { t, lang } = useLanguage();
@@ -14,6 +15,11 @@ export default function ProjectCard({ project }) {
     const status = lang === 'tr' ? project.status_tr : project.status_en;
 
     const images = (project.images || []).map(i => resolveMedia(i.image_url));
+
+    // Warm the cache with full-resolution screenshots so the lightbox is instant.
+    useEffect(() => {
+        preloadImages((project.images || []).map(i => resolveMedia(i.image_url)));
+    }, [project]);
 
     return (
         <>
@@ -38,13 +44,13 @@ export default function ProjectCard({ project }) {
                 {/* Screenshot gallery */}
                 {images.length > 0 && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 mb-8">
-                        {images.map((src, i) => (
+                        {project.images.map((img, i) => (
                             <button
-                                key={i}
+                                key={img.id ?? i}
                                 onClick={() => setViewerIndex(i)}
                                 className="relative group aspect-video rounded-sm overflow-hidden border border-ink-400 hover:border-ember transition-all duration-300 hover:shadow-ember-sm hover:z-10 hover:scale-[1.05]"
                             >
-                                <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" />
+                                <ThumbImage image={img.image_url} alt={img.alt_text || ''} className="w-full h-full object-cover" />
                                 <span className="absolute inset-0 bg-gradient-to-t from-ink-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                             </button>
                         ))}
