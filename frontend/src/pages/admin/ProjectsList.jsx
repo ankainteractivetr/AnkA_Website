@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, resolveMedia } from '../../api/client';
+import ThumbImage from '../../components/ThumbImage';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function ProjectsList() {
@@ -108,8 +109,8 @@ export default function ProjectsList() {
               >
                 <div className="w-24 h-24 sm:w-32 sm:h-20 flex-shrink-0 bg-ink-900 rounded overflow-hidden">
                   {cover ? (
-                    <img
-                      src={resolveMedia(cover.image_url)}
+                    <ThumbImage
+                      image={cover.image_url}
                       alt=""
                       className="w-full h-full object-cover"
                     />

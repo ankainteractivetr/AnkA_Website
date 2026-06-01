@@ -11,6 +11,56 @@ export function resolveMedia(url) {
     return url;
 }
 
+/**
+ * Resolve the thumbnail URL for a media path. Mirrors the backend convention
+ * (see backend/src/lib/thumbnail.js): the "_thumb" suffix is inserted before
+ * the file extension — /uploads/foo.png -> /uploads/foo_thumb.png — then the
+ * result is resolved like resolveMedia(). External (http) URLs have no generated
+ * thumbnail, so the original URL is returned unchanged.
+ */
+export function resolveThumb(url) {
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url; // external image, no thumb
+    // Split off any query/hash before locating the extension.
+    const m = url.match(/^([^?#]*)([?#].*)?$/);
+    const cleanPath = m ? m[1] : url;
+    const suffix = m && m[2] ? m[2] : '';
+    const slash = cleanPath.lastIndexOf('/');
+    const dot = cleanPath.lastIndexOf('.');
+    if (dot <= slash) return resolveMedia(url); // no extension -> nothing to derive
+    const thumbPath = `${cleanPath.slice(0, dot)}_thumb${cleanPath.slice(dot)}${suffix}`;
+    return resolveMedia(thumbPath);
+}
+
+// Keeps references to in-flight/decoded preload images so the browser doesn't
+// evict them before the user opens the lightbox. Also dedupes repeat requests.
+const _preloaded = new Map();
+
+/**
+ * Warm the browser cache with full-resolution images (already-resolved URLs).
+ * Runs during idle time so it never competes with the initial page render —
+ * by the time a visitor clicks a thumbnail, the full image is ready instantly.
+ */
+export function preloadImages(urls) {
+    if (typeof window === 'undefined' || !Array.isArray(urls)) return;
+
+    const run = () => {
+        for (const url of urls) {
+            if (!url || _preloaded.has(url)) continue;
+            const img = new Image();
+            img.decoding = 'async';
+            img.src = url;
+            _preloaded.set(url, img);
+        }
+    };
+
+    if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(run, { timeout: 3000 });
+    } else {
+        window.setTimeout(run, 1200);
+    }
+}
+
 const client = axios.create({
     baseURL: API_URL,
     headers: { 'Content-Type': 'application/json' },

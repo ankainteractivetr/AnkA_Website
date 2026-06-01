@@ -152,6 +152,45 @@ istek gönderdikleri URL'yi yeni uç noktalarla güncellemeniz yeterli.
   `anka.sql` bunlara `/uploads/seed/...` yolu ile referans verir.
 - CMS'ten yüklenen yeni görseller `backend/uploads/` klasörüne kaydedilir.
 
+### Thumbnail'lar / Thumbnails
+
+Hakkında, Oyunlar ve Programlar bölümlerindeki görsellerin küçük birer
+thumbnail kopyası bulunur. Sayfada **ızgaralarda küçük thumbnail** gösterilir;
+ziyaretçi tıkladığında lightbox'ta **asıl (büyük) görsel** açılır.
+
+- **Adlandırma kuralı:** thumbnail, asıl dosyanın yanına aynı uzantıyla
+  `_thumb` ekiyle yazılır → `shahmaran_00.png` → `shahmaran_00_thumb.png`.
+  (Frontend, thumbnail adresini bu kuraldan kendisi türetir; veritabanında ek
+  bir alan tutulmaz.)
+- **Otomatik üretim:** CMS'ten bir görsel yüklendiğinde backend, thumbnail'ı
+  otomatik oluşturur (`backend/src/lib/thumbnail.js`, `jimp` ile — derleme
+  gerektirmeyen, cPanel/Passenger üzerinde sorunsuz çalışan saf JavaScript).
+  Görsel silindiğinde thumbnail'ı da silinir. Thumbnail üretimi başarısız olsa
+  bile yükleme bozulmaz; frontend o görselde asıl dosyaya geri düşer.
+- **Önyükleme:** Sayfa yüklendikten sonra asıl (büyük) görseller boşta kalan
+  zamanda (`requestIdleCallback`) sessizce belleğe alınır; böylece bir
+  thumbnail'a tıklandığında büyük görsel anında açılır.
+- **Mevcut/seed görseller:** `backend/uploads/seed/` içindeki başlangıç
+  görsellerinin thumbnail'ları hazır olarak gelir (`*_thumb.png`). Sonradan
+  elle dosya eklerseniz veya thumbnail'ları yeniden üretmek isterseniz:
+
+  ```bash
+  cd backend
+  npm run thumbs            # yalnızca eksik thumbnail'ları üretir
+  npm run thumbs -- --force # tüm thumbnail'ları yeniden üretir
+  ```
+
+- **Ayarlar (opsiyonel, `backend/.env`):**
+
+  | Değişken | Varsayılan | Açıklama |
+  |---|---|---|
+  | `THUMB_MAX_PX` | `480` | Thumbnail'ın en uzun kenarı (px). Küçültür, asla büyütmez. |
+  | `THUMB_JPEG_QUALITY` | `82` | `.jpg/.jpeg` thumbnail kalitesi (PNG/WEBP kayıpsız yazılır). |
+
+  > Thumbnail, asıl dosyayla **aynı uzantıyı** korur (PNG → PNG). PNG ekran
+  > görüntüleri için daha küçük dosya isterseniz `THUMB_MAX_PX` değerini
+  > düşürebilirsiniz (örn. `360`).
+
 > `trooper/` (Caner'ın kişisel sayfası) bu yeniden yapımın parçası değildir;
 > ayrı tutulmuştur ve dilediğiniz gibi yanına ekleyebilirsiniz.
 

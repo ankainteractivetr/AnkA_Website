@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+const { generateThumbnail } = require('../lib/thumbnail');
+
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -35,4 +37,23 @@ const upload = multer({
     limits: { fileSize: maxMB * 1024 * 1024 },
 });
 
-module.exports = { upload, UPLOAD_DIR };
+/**
+ * Express middleware: after multer has stored an upload, create a `_thumb`
+ * variant next to it. A thumbnail failure must never block the upload — we log
+ * a warning and continue (the frontend falls back to the full image).
+ *
+ * Use it right after `upload.single('image')`:
+ *     router.post('/x/images', upload.single('image'), makeThumbnail, handler)
+ */
+async function makeThumbnail(req, res, next) {
+    try {
+        if (req.file && req.file.path) {
+            await generateThumbnail(req.file.path);
+        }
+    } catch (err) {
+        console.warn(`[thumb] could not generate thumbnail for ${req.file && req.file.filename}: ${err.message}`);
+    }
+    next();
+}
+
+module.exports = { upload, UPLOAD_DIR, makeThumbnail };

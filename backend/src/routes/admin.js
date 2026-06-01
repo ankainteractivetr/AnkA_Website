@@ -9,7 +9,8 @@ const fs = require('fs');
 
 const { query, queryOne } = require('../db');
 const { requireAuth } = require('../middleware/auth');
-const { upload, UPLOAD_DIR } = require('../middleware/upload');
+const { upload, UPLOAD_DIR, makeThumbnail } = require('../middleware/upload');
+const { thumbPathFor } = require('../lib/thumbnail');
 
 const router = express.Router();
 
@@ -75,7 +76,7 @@ router.put('/about', requireAuth, async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
-router.post('/about/images', requireAuth, upload.single('image'), async (req, res, next) => {
+router.post('/about/images', requireAuth, upload.single('image'), makeThumbnail, async (req, res, next) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: 'No file.' });
         const url = `/uploads/${req.file.filename}`;
@@ -208,7 +209,7 @@ router.delete('/projects/:id', requireAuth, async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
-router.post('/projects/:id/images', requireAuth, upload.single('image'), async (req, res, next) => {
+router.post('/projects/:id/images', requireAuth, upload.single('image'), makeThumbnail, async (req, res, next) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: 'No file.' });
         const url = `/uploads/${req.file.filename}`;
@@ -393,6 +394,8 @@ function tryDeleteUploadedFile(urlPath) {
     const filename = urlPath.replace('/uploads/', '');
     const full = path.join(UPLOAD_DIR, filename);
     fs.unlink(full, () => {});
+    // Remove its thumbnail too (best-effort; ignore if absent)
+    fs.unlink(thumbPathFor(full), () => {});
 }
 
 module.exports = router;
