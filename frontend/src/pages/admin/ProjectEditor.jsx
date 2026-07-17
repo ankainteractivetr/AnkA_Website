@@ -16,6 +16,8 @@ const emptyProject = {
   features_tr: '',
   steam_widget_url: '',
   microsoft_store_url: '',
+  sourceforge_name: '',
+  sourceforge_group_id: '',
   trailer_url: '',
   download_url: '',
   status_en: '',
@@ -396,6 +398,42 @@ export default function ProjectEditor() {
               {t(
                 'Shown as a Microsoft Store badge (great for software).',
                 'Microsoft Store rozeti olarak gösterilir (programlar için ideal).'
+              )}
+            </p>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-[0.2em] text-ash/80 mb-2">
+              {t('SourceForge Project Name', 'SourceForge Proje Adı')}
+            </label>
+            <input
+              type="text"
+              value={project.sourceforge_name}
+              onChange={handleChange('sourceforge_name')}
+              className="input-anka text-sm"
+              placeholder="ayzit"
+            />
+            <p className="text-[11px] text-ash/50 mt-1.5">
+              {t(
+                'Badge opens https://sourceforge.net/p/<name>/ in a new tab.',
+                'Rozet, https://sourceforge.net/p/<ad>/ adresini yeni sekmede açar.'
+              )}
+            </p>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-[0.2em] text-ash/80 mb-2">
+              {t('SourceForge Group ID', 'SourceForge Grup ID')}
+            </label>
+            <input
+              type="text"
+              value={project.sourceforge_group_id}
+              onChange={handleChange('sourceforge_group_id')}
+              className="input-anka text-sm"
+              placeholder="4115303"
+            />
+            <p className="text-[11px] text-ash/50 mt-1.5">
+              {t(
+                'Numeric id used by the sflogo badge image. Both fields are required for the badge to show.',
+                'Sflogo rozet görseli için sayısal id. Rozetin görünmesi için iki alan da gereklidir.'
               )}
             </p>
           </div>

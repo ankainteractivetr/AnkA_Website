@@ -149,15 +149,18 @@ router.post('/projects', requireAuth, async (req, res, next) => {
         const result = await query(
             `INSERT INTO projects
              (slug, type, title, tagline_en, tagline_tr, description_en, description_tr,
-              features_en, features_tr, steam_widget_url, trailer_url, download_url,
-              status_en, status_tr, display_order, is_published)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              features_en, features_tr, steam_widget_url, microsoft_store_url,
+              sourceforge_name, sourceforge_group_id,
+              trailer_url, download_url, status_en, status_tr, display_order, is_published)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 p.slug, p.type, p.title,
                 p.tagline_en || '', p.tagline_tr || '',
                 p.description_en || '', p.description_tr || '',
                 p.features_en || '', p.features_tr || '',
-                p.steam_widget_url || null, p.trailer_url || null, p.download_url || null,
+                p.steam_widget_url || null, p.microsoft_store_url || null,
+                p.sourceforge_name || null, p.sourceforge_group_id || null,
+                p.trailer_url || null, p.download_url || null,
                 p.status_en || null, p.status_tr || null,
                 p.display_order || 0, p.is_published == null ? 1 : (p.is_published ? 1 : 0),
             ]
@@ -178,7 +181,9 @@ router.put('/projects/:id', requireAuth, async (req, res, next) => {
               tagline_en = ?, tagline_tr = ?,
               description_en = ?, description_tr = ?,
               features_en = ?, features_tr = ?,
-              steam_widget_url = ?, trailer_url = ?, download_url = ?,
+              steam_widget_url = ?, microsoft_store_url = ?,
+              sourceforge_name = ?, sourceforge_group_id = ?,
+              trailer_url = ?, download_url = ?,
               status_en = ?, status_tr = ?,
               display_order = ?, is_published = ?
              WHERE id = ?`,
@@ -187,7 +192,9 @@ router.put('/projects/:id', requireAuth, async (req, res, next) => {
                 p.tagline_en || '', p.tagline_tr || '',
                 p.description_en || '', p.description_tr || '',
                 p.features_en || '', p.features_tr || '',
-                p.steam_widget_url || null, p.trailer_url || null, p.download_url || null,
+                p.steam_widget_url || null, p.microsoft_store_url || null,
+                p.sourceforge_name || null, p.sourceforge_group_id || null,
+                p.trailer_url || null, p.download_url || null,
                 p.status_en || null, p.status_tr || null,
                 p.display_order || 0, p.is_published ? 1 : 0,
                 req.params.id,
