@@ -67,6 +67,8 @@ CREATE TABLE `projects` (
   `features_tr` MEDIUMTEXT,
   `steam_widget_url` VARCHAR(500) DEFAULT NULL,
   `microsoft_store_url` VARCHAR(500) DEFAULT NULL,
+  `sourceforge_name` VARCHAR(100) DEFAULT NULL,
+  `sourceforge_group_id` VARCHAR(20) DEFAULT NULL,
   `trailer_url` VARCHAR(500) DEFAULT NULL,
   `download_url` VARCHAR(500) DEFAULT NULL,
   `status_en` VARCHAR(255) DEFAULT NULL,
@@ -189,7 +191,7 @@ INSERT INTO `about_images` (`image_url`, `alt_text`, `display_order`) VALUES
 
 -- Projects: Shahmaran (game) and Ayzıt (software)
 INSERT INTO `projects`
-(`slug`, `type`, `title`, `tagline_en`, `tagline_tr`, `description_en`, `description_tr`, `features_en`, `features_tr`, `steam_widget_url`, `trailer_url`, `download_url`, `status_en`, `status_tr`, `display_order`)
+(`slug`, `type`, `title`, `tagline_en`, `tagline_tr`, `description_en`, `description_tr`, `features_en`, `features_tr`, `steam_widget_url`, `sourceforge_name`, `sourceforge_group_id`, `trailer_url`, `download_url`, `status_en`, `status_tr`, `display_order`)
 VALUES
 ('shahmaran', 'game', 'Shahmaran',
 'A Mythological Twist on a Timeless Classic!',
@@ -199,6 +201,8 @@ VALUES
 '**A Timeless Classic, Reborn** — Experience grid-based movement like never before. Slither across the map, devour food to increase your length, and outmaneuver your foes.\n\n**Unleash Mythological Magic** — Master 12 unique spells from diverse schools of magic to decimate the enemy hordes. When magic isn''t enough, whip your draconic tail to deliver devastating ranged spit attacks.\n\n**Formidable Foes & Epic Bosses** — Survive against 9 distinct, terrifying enemy types that actively target your body to shrink your size. Battle through 3 brutal minor bosses before your final confrontation with the Vizier himself.\n\n**Dynamic Companion Combat** — Build up your action points and call upon your trusty companion, Jamsab. Command him to drop tar-filled barrels to snare swarms, or let him dive into the fray with his blade and flintlock pistol.\n\n**Next-Gen Visuals** — Brought to life in Unreal Engine, journey through 4 distinct, visually stunning environments featuring hardware ray tracing, deferred shading, and gorgeous atmospheric lighting.',
 '**Zamansız Bir Klasik Yeniden Doğuyor** — Kare (grid) tabanlı hareketi daha önce hiç olmadığı gibi deneyimleyin. Harita üzerinde süzülün, boyunuzu uzatmak için yiyecekleri yutun ve düşmanlarınızı alt edin.\n\n**Mitolojik Büyüleri Serbest Bırakın** — Düşman sürülerini yok etmek için farklı büyü okullarından 12 benzersiz büyüde ustalaşın. Büyü yeterli olmadığında, ejderhayı andıran kuyruğunuzu savurun ve yıkıcı menzilli zehir saldırıları yapın.\n\n**Zorlu Düşmanlar ve Destansı Boss''lar** — Boyutunuzu küçültmek için doğrudan bedeninizi hedef alan birbirinden farklı 9 korkutucu düşman türüne karşı hayatta kalın. Vezir''in kendisiyle yapacağınız nihai yüzleşmeden önce 3 acımasız alt-boss''u alt edin.\n\n**Dinamik Yoldaş Dövüşü** — Aksiyon puanlarınızı biriktirin ve sadık yoldaşınız Camsab''ı yardıma çağırın. Üzerinize gelen sürüleri tuzağa düşürmek için ona katran dolu fıçıları bırakmasını emredin ya da kılıcı ve çakmaklı tabancasıyla çatışmanın ortasına dalmasına izin verin.\n\n**Yeni Nesil Görseller** — Unreal Engine ile hayat bulan oyunda; donanımsal ışın izleme, geciktirilmiş gölgelendirme ve muhteşem atmosferik aydınlatmalara sahip 4 farklı ve görsel açıdan büyüleyici ortamda epik bir yolculuğa çıkın.',
 'https://store.steampowered.com/widget/3061480/',
+NULL,
+NULL,
 'https://youtu.be/znUv_1yW4So',
 NULL,
 'Full version under heavy development. Prototype available now.',
@@ -213,6 +217,8 @@ NULL,
 'Shadow Mapping, Deferred Shading, Physically Based Rendering, Normal Mapping, Cube Mapping, Displacement Mapping, Bump Mapping, Parallax Mapping, Gamma Correction, HDR, Bloom, Screen Space Ambient Occlusion, Custom Resolve Anti-Aliasing, and more.',
 'Shadow Mapping, Deferred Shading, Physically Based Rendering, Normal Mapping, Cube Mapping, Displacement Mapping, Bump Mapping, Parallax Mapping, Gamma Correction, HDR, Bloom, Screen Space Ambient Occlusion, Custom Resolve Anti-Aliasing, ve daha fazlası.',
 NULL,
+'ayzit',
+'4115303',
 NULL,
 '/ayzit-1_0_0.exe',
 'Released — MIT License — Free for commercial & non-commercial use.',

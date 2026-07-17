@@ -125,6 +125,24 @@ export default function ProjectCard({ project }) {
                     </div>
                 )}
 
+                {/* SourceForge badge — links to the project's SourceForge page */}
+                {project.sourceforge_name && project.sourceforge_group_id && (
+                    <div className="text-center mt-6">
+                        <a
+                            href={`https://sourceforge.net/p/${project.sourceforge_name}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block rounded-md overflow-hidden border border-transparent hover:border-ember hover:shadow-ember-sm transition-all duration-300"
+                        >
+                            <img
+                                alt={`${t('Download', 'İndir')} ${project.title}`}
+                                src={`https://sourceforge.net/sflogo.php?type=18&group_id=${project.sourceforge_group_id}`}
+                                width="200"
+                            />
+                        </a>
+                    </div>
+                )}
+
                 {/* Steam widget */}
                 {project.steam_widget_url && (
                     <div className="mt-10">

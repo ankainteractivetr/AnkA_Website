@@ -84,14 +84,12 @@ export default function Footer() {
         }).catch(() => {});
     }, []);
 
-    const year = new Date().getFullYear();
-
     return (
         <footer className="relative bg-ink-900/80 border-t border-ink-400/60 mt-0">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 grid sm:grid-cols-3 items-center gap-6">
                 <div className="text-center sm:text-left">
                     <p className="font-deco text-2xl text-parchment leading-snug">AnkA Interactive</p>
-                    <p className="font-heading text-ember tracking-widest text-sm">© 2023 — {year}</p>
+                    <p className="font-heading text-ember tracking-widest text-sm">© 2023 — 2026</p>
                 </div>
 
                 <div className="flex justify-center gap-3">
