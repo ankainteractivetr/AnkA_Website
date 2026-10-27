@@ -25,11 +25,9 @@ build/
 **/build/
 .vite/
 
-# --- User-uploaded media (keep folder + seed images, ignore the rest) ---
+# --- Uploaded media is data, not code: keep the folder only ---
 backend/uploads/*
 !backend/uploads/.gitkeep
-!backend/uploads/seed/
-!backend/uploads/seed/**
 
 # --- Logs ---
 logs/
@@ -58,3 +56,6 @@ desktop.ini
 
 # --- Misc ---
 *.local
+
+# --- Claude Code local settings (dev server launch config) ---
+.claude/

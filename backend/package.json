@@ -1,23 +1,37 @@
 {
   "name": "anka-backend",
-  "version": "1.0.0",
-  "description": "AnkA Interactive — Backend API + CMS (Node.js / Express / MySQL)",
+  "version": "2.0.0",
+  "description": "AnkA Interactive — API + CMS (Node.js / Express / MySQL)",
+  "license": "MIT",
+  "author": "Caner Kurt",
+  "type": "module",
   "main": "server.js",
-  "type": "commonjs",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "lint": "eslint .",
     "thumbs": "node scripts/generate-thumbnails.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
     "jimp": "^0.22.12",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
-    "mysql2": "^3.11.0",
-    "nodemailer": "^6.9.14"
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
+    "mysql2": "^3.24.6",
+    "nodemailer": "^10.1.7"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0"
   }
 }
