@@ -1,215 +1,211 @@
-# AnkA Interactive — Web Sitesi (Vite + React + Node.js + MySQL)
+# AnkA Interactive — Web Sitesi (Vite + React + Tailwind CSS + Node.js + MySQL)
 
-Modern, koyu temalı, çift dilli (Türkçe/İngilizce) AnkA Interactive web sitesi
-ve yönetim paneli (CMS). Eski statik site; CMS'ten yönetilebilen tam bir
-full-stack uygulamaya dönüştürüldü. Eski Python uygulamaları (`katip.py`,
-`umay.py`) ve iletişim formu (`ulak.js`) Node.js'e taşındı.
+Modern, koyu temalı, çift dilli (Türkçe/İngilizce) AnkA Interactive web sitesi ve
+yönetim paneli (CMS). Eski Python uygulamaları (`katip.py`, `umay.py`) ve iletişim
+formu (`ulak.js`) Node.js'e taşınmıştır; eski oyun istemcileri değişiklik olmadan
+çalışmaya devam eder.
 
-> **EN:** Modern, dark-themed, bilingual (TR/EN) website + CMS for AnkA
-> Interactive. Static site rebuilt into a full Vite/React + Node/Express/MySQL
-> stack. The original Python apps and the contact mailer were ported to Node.js.
+> **EN:** Modern, dark-themed, bilingual (TR/EN) website + CMS for AnkA Interactive.
+> Object-oriented JavaScript with a clean-architecture backend (Express + MySQL) and a
+> React 19 + Tailwind CSS 4 frontend.
 
----
+## Teknolojiler
 
-## İçindekiler / Contents
+- **frontend/** — React 19, Vite, Tailwind CSS 4, React Router, axios
+- **backend/** — Node.js 20+, Express 5, MySQL (`mysql2`), JWT (httpOnly cookie), jimp (thumbnail)
 
 ```
-anka-project/
-├── backend/      → Node.js + Express + MySQL API (port 5000)
-│   ├── anka.sql  → veritabanı şeması + başlangıç içeriği (import edin)
-│   └── ...
-└── frontend/     → Vite + React + Tailwind (port 5173)
-    └── ...
+AnkA_Website/
+├── backend/
+│   ├── anka.sql          → veritabanı şeması (yalnızca tablolar, içerik yok)
+│   ├── uploads/          → yüklenen görseller (veri: git'te tutulmaz)
+│   ├── server.js         → başlangıç dosyası (cPanel/Passenger ayarı değişmesin diye aynı yerde)
+│   ├── scripts/          → npm run thumbs
+│   └── src/
+│       ├── domain/          → entity'ler, value object'ler, hatalar (framework'süz iş kuralları)
+│       ├── application/     → port'lar (soyut sınıflar) ve use-case'ler
+│       ├── infrastructure/  → MySQL, dosya depolama, jimp, SMTP, bcrypt, JWT adapter'ları
+│       ├── presentation/    → Express: controller, middleware, route modülleri
+│       ├── Container.js     → composition root: hangi port'u hangi sınıfın uyguladığını bilen tek yer
+│       └── *Module.js       → Public / Admin / Legacy uç noktalarının bağlanması
+├── frontend/
+│   └── src/
+│       ├── domain/      → saf sınıflar (MediaUrl, GalleryImage, InlineMarkup, Translator …)
+│       ├── services/    → API ve tarayıcı adapter'ları; services/index.js composition root
+│       ├── hooks/       → durum mantığı (useEditor, useAdminList, useThumbnail …)
+│       ├── components/  → yalnızca Tailwind sınıflarıyla stillenmiş bileşenler
+│       ├── pages/ layouts/ routes/ auth/ i18n/
+│       └── index.css    → Tailwind 4 @theme token'ları + taban stiller
+└── eslint-rules/        → ev kuralı: sınıf/fonksiyon gövdesinin { işareti yeni satırda
 ```
 
----
+## Kod standartları
 
-## 1. Gereksinimler / Requirements
+Her iki uygulama da `npm run lint` ile denetlenir (`eslint-rules/` + `*/eslint.config.js`):
 
-- **Node.js** 18+ (öneri: 20 LTS)
-- **MySQL** 8+ (veya MariaDB 10.4+)
-- npm
+- Fonksiyonlar en fazla **10 satır** (boş satırlar dahil).
+- Her ifade **`;`** ile biter.
+- Sınıf ve fonksiyon gövdelerinin **`{`** işareti yeni satırdadır.
+- Nesne yönelimli, SOLID: her sınıfın tek sorumluluğu var; use-case'ler port'lara (soyut
+  sınıflar) bağımlıdır, somut sınıfları yalnızca `Container.js` / `services/index.js` seçer.
+- Kullanılan tasarım kalıpları: Composition Root / Dependency Injection, Repository, Adapter,
+  Facade (`HttpServer`), Decorator (`ThumbnailingFileStorage`, `CachedResource`,
+  `TrackedResource`), Strategy (galeri tablo eşlemeleri, `PasswordHasher`, `TokenService`,
+  hizmet türleri: `WorkMedia` / `WORK_KINDS`),
+  Null Object (`LogMailer`), Factory (`Endpoint`, `RateLimiter`, entity `create`), Observer
+  (`LoadingTracker`), State Machine (`useEditor`).
 
----
+## Kurulum
 
-## 2. Veritabanı / Database
-
-Yerel MySQL'de bir veritabanı oluşturup `anka.sql` dosyasını içe aktarın:
+Node.js 20+ ve bir MySQL 8+ (veya MariaDB 10.4+) veritabanı gerekir.
 
 ```bash
-# Veritabanını oluştur
-mysql -u root -p -e "CREATE DATABASE anka CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# Şema + başlangıç içeriğini yükle
-mysql -u root -p anka < backend/anka.sql
+npm run install:all
 ```
 
-> **www.ankainteractive.com için:** Aynı `backend/anka.sql` dosyasını hosting
-> panelinizdeki (cPanel/phpMyAdmin) veritabanına import edin. Ardından
-> `backend/.env` içindeki DB bilgilerini sunucu bilgilerinizle güncelleyin.
+### Veritabanı ve görseller
 
----
+Sitenin içeriği (veritabanı) ve yüklenen görselleri (`backend/uploads/`) repoda tutulmaz;
+bunlar canlı siteden alınır:
 
-## 3. Backend kurulumu / Backend setup
+1. Canlı veritabanının dökümünü yerel bir veritabanına (ör. `anka_website`) aktarın ve
+   `backend/.env` içindeki `DB_NAME` değerini ona göre ayarlayın.
+2. Canlı sunucudaki `uploads/` klasörünün içeriğini `backend/uploads/` altına kopyalayın
+   (alt klasörleriyle birlikte; veritabanı görselleri `/uploads/…` yollarıyla tutar).
+
+Boş bir kurulumda yalnızca tabloları oluşturmak için şemayı içe aktarın. Dosya hiçbir
+tabloyu silmez ve içerik eklemez; CMS hesabı API'nin ilk açılışında `.env`'den oluşturulur,
+metinler ve görseller CMS'ten girilir:
 
 ```bash
-cd backend
-cp .env.example .env        # .env dosyasını düzenleyin (aşağıya bakın)
-npm install
-npm start                   # http://localhost:5000
+mysql -u root -p -e "CREATE DATABASE anka_website CHARACTER SET utf8mb4;"
+mysql -u root -p anka_website < backend/anka.sql
 ```
 
-`backend/.env` içinde mutlaka ayarlayın:
+> MySQL 8.4+ `mysql_native_password` eklentisini varsayılan olarak yüklemez. Uygulama
+> kullanıcınız bu eklentiyle tanımlıysa bağlantı `ER_PLUGIN_IS_NOT_LOADED` ile reddedilir;
+> kullanıcıyı `caching_sha2_password` ile yeniden tanımlayın:
+> `ALTER USER 'kullanici'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'parola';`
 
-| Değişken | Açıklama |
+### Ortam değişkenleri
+
+- `backend/.env.example` → `backend/.env`
+- `frontend/.env.example` → `frontend/.env` (geliştirmede boş bırakılabilir)
+
+| Değişken (backend) | Açıklama |
 |---|---|
-| `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL bağlantısı (`DB_NAME=anka`) |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | CMS giriş bilgileri — **mutlaka değiştirin** |
-| `JWT_SECRET` | Uzun, rastgele bir gizli anahtar |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_TO` | İletişim formu e-postaları için |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | MySQL bağlantısı (`DB_NAME=anka_website`) |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD` | CMS hesabı — her açılışta bu değerlerden yeniden oluşturulur. **`ADMIN_PASSWORD` zorunlu.** |
+| `JWT_SECRET`, `JWT_EXPIRES_IN` | Oturum token'ı (zorunlu, uzun ve rastgele) ve süresi (varsayılan `7d`) |
+| `SMTP_*` | İletişim formu e-postaları; `SMTP_HOST`/`SMTP_USER` boşsa e-postalar yalnızca loglanır |
 | `CORS_ORIGINS` | İzin verilen frontend adresleri (virgülle ayrılmış) |
+| `FRONTEND_DIR` | İsteğe bağlı: API'nin siteyi de sunması için derlenmiş frontend klasörü (ör. `../frontend/dist`) |
+| `MAX_UPLOAD_SIZE_MB`, `THUMB_MAX_PX`, `THUMB_JPEG_QUALITY` | Yükleme sınırı ve thumbnail ayarları |
 
-> **Önemli:** Sunucu her açılışta `ADMIN_PASSWORD` değerini `.env`'den okuyup
-> yeniden hash'ler. Yani parolayı değiştirmek için sadece `.env`'i düzenleyip
-> sunucuyu yeniden başlatmanız yeterli. SMTP parolası artık kodda değil, yalnızca
-> `.env` içinde tutulur.
+| Değişken (frontend) | Açıklama |
+|---|---|
+| `VITE_API_URL` | API adresi. Geliştirmede boş: Vite `/api` ve `/uploads` isteklerini backend'e yönlendirir |
+| `VITE_BACKEND_URL` | Yüklenen görsellerin (`/uploads/…`) sunulduğu adres; boşsa sitenin kendi adresi |
+| `API_PROXY_TARGET` | Yalnızca geliştirme: Vite'ın yönlendirdiği backend (varsayılan `http://localhost:5000`) |
 
-İletişim formu, e-posta gönderimi başarısız olsa bile mesajı her zaman
-veritabanına kaydeder; tüm mesajları CMS'teki **Gönderiler** ekranından
-görebilirsiniz.
+> **Canlı derleme:** üretim değerlerini (`VITE_API_URL=https://www.ankainteractive.com/api`,
+> `VITE_BACKEND_URL=https://api.ankainteractive.com`) `frontend/.env.production` dosyasına koyun.
+> `frontend/.env` içinde kalırlarsa `npm run dev` de canlı API'yi kullanır.
 
----
-
-## 4. Frontend kurulumu / Frontend setup
-
-```bash
-cd frontend
-cp .env.example .env        # VITE_API_URL doğru mu kontrol edin
-npm install
-npm run dev                 # http://localhost:5173
-```
-
-`frontend/.env`:
-
-```
-VITE_API_URL=http://localhost:5000/api
-VITE_BACKEND_URL=http://localhost:5000
-```
-
-Canlı dağıtım için:
+## Geliştirme
 
 ```bash
-npm run build               # dist/ klasörü oluşur
-npm run preview             # üretim derlemesini yerelde test et
+npm run dev
 ```
 
-`dist/` içeriğini web sunucunuza yükleyin. Backend'i ayrı bir Node süreci olarak
-(PM2, systemd vb.) çalıştırın ve canlı `VITE_API_URL` değerini kendi API
-adresinizle build edin.
+API'yi http://localhost:5000, siteyi http://localhost:5173 adresinde başlatır. Vite `/api`
+ve `/uploads` isteklerini API'ye yönlendirir; böylece ikisi tek origin üzerinde çalışır ve
+CMS oturum çerezi CORS ayarı gerektirmez.
 
----
+- Site: http://localhost:5173
+- CMS: http://localhost:5173/admin
+- Sağlık kontrolü: http://localhost:5173/api/health
 
-## 5. CMS / Yönetim paneli
+```bash
+npm run lint     # backend + frontend
+npm run build    # frontend/dist
+npm start        # backend (canlı)
+```
 
-- Adres: **`/admin`** (örn. `http://localhost:5173/admin`)
-- Giriş: `.env`'deki `ADMIN_USERNAME` / `ADMIN_PASSWORD`
-- Varsayılan: `admin` / `ankaadmin2026` → **ilk işiniz bunu değiştirmek olsun.**
+## CMS / Yönetim paneli
+
+- Adres: **`/admin`** — oturum yoksa giriş formu aynı adreste gösterilir.
+- Oturum, JavaScript'in okuyamadığı bir **httpOnly çerezde** tutulur (XSS ile çalınamaz,
+  `SameSite=Strict`). Bu yüzden site ve API aynı site altında olmalıdır
+  (ör. `www.ankainteractive.com` ve `www.ankainteractive.com/api`).
+- Giriş denemeleri ve iletişim formu IP başına hız sınırlıdır.
 
 CMS ile yönetebilecekleriniz:
 
 - **Hakkında**: başlık, EN/TR metin, galeri görselleri (yükle / sırala / sil)
-- **Projeler**: oyun ve yazılımları ekleme/düzenleme/silme — başlık, slogan,
-  açıklama, özellikler (EN/TR), durum etiketi, Steam widget, fragman ve indirme
-  linkleri, ekran görüntüleri, yayında/taslak durumu, sıralama
-- **İletişim & Sosyal**: iletişim bölümü metinleri (EN/TR), e-posta, Google
-  Harita embed adresi, sosyal medya linkleri (ekle/düzenle/sırala/aç-kapa)
+- **Projeler**: oyun ve yazılımlar — başlık, slogan, açıklama, özellikler, durum, Steam
+  widget, fragman, indirme, Microsoft Store ve SourceForge bağlantıları, ekran görüntüleri,
+  yayında/taslak, sıralama
+- **Hizmetler**: müşteriler için yapılan işler — başlık, tür (web sitesi veya uygulama), adres,
+  yayında/taslak, sıralama. Sitede iki sütunlu bir panelde gösterilir: solda işlerin listesi,
+  sağda seçilen işin web sitesi ya da (uygulamalar için) YouTube videosu bir iframe içinde.
+  Uygulama adresi bir YouTube video linki olmalıdır (`youtu.be/…`, `watch?v=…`, `shorts/…`).
+  Bazı siteler iframe içinde açılmayı reddeder (`X-Frame-Options`); çerçevenin üstündeki
+  **Aç** linki siteyi yeni sekmede açar.
+- **İletişim & Sosyal**: iletişim bölümü metinleri, e-posta, Google Harita adresi, sosyal
+  medya linkleri (ekle / düzenle / sırala / aç-kapa)
 - **Gönderiler**: iletişim mesajları (okundu işaretle, yanıtla, sil), oyun geri
   bildirimleri ve yüksek skor tablosu
 
-Metin alanları küçük bir markdown destekler: `[etiket](https://...)` link,
-`**kalın**`, `*italik*` ve paragraf için boş satır.
+Uzun metinler küçük bir işaretleme destekler: `[etiket](https://...)` link, `**kalın**`,
+`*italik*` ve paragraf için boş satır.
 
----
+## API
 
-## 6. Eski Python/Node uygulamalarının karşılıkları
+| Uç nokta | Açıklama |
+|---|---|
+| `GET /api/public/about`, `/api/public/projects`, `/api/public/client-works`, `/api/public/contact-info` | Sitenin içeriği |
+| `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` | CMS oturumu |
+| `/api/admin/…` | CMS uç noktaları (oturum gerekir) |
+| `GET /api/health` | `{ ok, ts }` |
 
-| Eski | Yeni Node.js uç noktası | Not |
+### Eski uygulamaların karşılıkları (değişmedi)
+
+| Eski | Node.js uç noktası | Not |
 |---|---|---|
-| `katip/katip.py` (oyun geri bildirimi) | `POST /api/games/feedback` | `feedback_game_id`, `feedback_message`, `feedback_language` alan adları korundu |
-| `umay/umay.py` (yüksek skor) | `POST /api/games/high-score` + `GET /api/games/leaderboard?gameId=` | `score_game_id`, `score_player_name`, `score_player_score` korundu |
-| `ulak/ulak.js` (iletişim formu) | `POST /api/contact` (ayrıca `POST /api/ulak`) | SMTP parolası artık `.env`'de; mesaj DB'ye de kaydedilir |
+| `katip/katip.py` (oyun geri bildirimi) | `POST /api/games/feedback` | `feedback_game_id`, `feedback_message`, `feedback_language` |
+| `umay/umay.py` (yüksek skor) | `POST /api/games/high-score` + `GET /api/games/leaderboard?gameId=` | `score_game_id`, `score_player_name`, `score_player_score`, `score_language` |
+| `ulak/ulak.js` (iletişim formu) | `POST /api/contact` (ayrıca `POST /api/ulak`) | `contact_name`, `contact_email`, `contact_subject`, `contact_message`, `contact_lang` |
 
-Oyun istemcileriniz eski alan adlarıyla çalışmaya devam edebilir; yalnızca
-istek gönderdikleri URL'yi yeni uç noktalarla güncellemeniz yeterli.
+İstek alanları ve yanıt biçimleri (`success: 0/1`, `message`, `ranking`, `invalid_field` …)
+eskisiyle birebir aynıdır; form-encoded ve JSON gövdeler kabul edilir.
 
----
+## Görseller ve thumbnail'lar
 
-## 7. Görseller / Assets
-
-- Genel görseller `frontend/public/` içinde (logo, `seperator.png`, Shahmaran
-  ekran görüntüleri, ofis fotoğrafları, `MADE-IN-TURKIYE.png`).
-- Başlangıç içeriğindeki görseller `backend/uploads/seed/` içinde durur ve
-  `anka.sql` bunlara `/uploads/seed/...` yolu ile referans verir.
-- CMS'ten yüklenen yeni görseller `backend/uploads/` klasörüne kaydedilir.
-
-### Thumbnail'lar / Thumbnails
-
-Hakkında, Oyunlar ve Programlar bölümlerindeki görsellerin küçük birer
-thumbnail kopyası bulunur. Sayfada **ızgaralarda küçük thumbnail** gösterilir;
-ziyaretçi tıkladığında lightbox'ta **asıl (büyük) görsel** açılır.
-
-- **Adlandırma kuralı:** thumbnail, asıl dosyanın yanına aynı uzantıyla
-  `_thumb` ekiyle yazılır → `shahmaran_00.png` → `shahmaran_00_thumb.png`.
-  (Frontend, thumbnail adresini bu kuraldan kendisi türetir; veritabanında ek
-  bir alan tutulmaz.)
-- **Otomatik üretim:** CMS'ten bir görsel yüklendiğinde backend, thumbnail'ı
-  otomatik oluşturur (`backend/src/lib/thumbnail.js`, `jimp` ile — derleme
-  gerektirmeyen, cPanel/Passenger üzerinde sorunsuz çalışan saf JavaScript).
-  Görsel silindiğinde thumbnail'ı da silinir. Thumbnail üretimi başarısız olsa
-  bile yükleme bozulmaz; frontend o görselde asıl dosyaya geri düşer.
-- **Önyükleme:** Sayfa yüklendikten sonra asıl (büyük) görseller boşta kalan
-  zamanda (`requestIdleCallback`) sessizce belleğe alınır; böylece bir
-  thumbnail'a tıklandığında büyük görsel anında açılır.
-- **Mevcut/seed görseller:** `backend/uploads/seed/` içindeki başlangıç
-  görsellerinin thumbnail'ları hazır olarak gelir (`*_thumb.png`). Sonradan
-  elle dosya eklerseniz veya thumbnail'ları yeniden üretmek isterseniz:
+- Genel görseller (logo, ayırıcı, rozet) `frontend/public/` içindedir.
+- CMS'ten yüklenen görseller içeriklerine (magic bytes) göre denetlenir (JPG/PNG/WEBP/GIF) ve
+  `backend/uploads/<uuid>.<uzantı>` olarak saklanır; yanına otomatik olarak `_thumb` kopyası
+  üretilir (`foo.png` → `foo_thumb.png`). Bir görsel CMS'ten silinince dosyası ve thumbnail'ı
+  da silinir — `uploads/` altındaki hangi klasörde olursa olsun.
+- **Önce thumbnail'lar:** ana sayfa önce verisini ve sayfadaki **tüm thumbnail'ları** yükler.
+  Hepsi bittiğinde tam boy görseller **arka planda, sırayla ve düşük öncelikle** yüklenir
+  (`BackgroundImageQueue`); bu sırada yeni bir thumbnail yüklenmeye başlarsa kuyruk bekler.
+  Böylece bir thumbnail'a tıklandığında büyük görsel çoğunlukla anında açılır.
+- Thumbnail'ı olmayan bir görselde (eski yüklemeler, GIF) site tam boy dosyaya geri düşer.
+- Eksik thumbnail'ları üretmek için:
 
   ```bash
-  cd backend
-  npm run thumbs            # yalnızca eksik thumbnail'ları üretir
-  npm run thumbs -- --force # tüm thumbnail'ları yeniden üretir
+  npm --prefix backend run thumbs             # yalnızca eksikler
+  npm --prefix backend run thumbs -- --force  # hepsini yeniden üret
   ```
 
-- **Ayarlar (opsiyonel, `backend/.env`):**
+## Canlıya alma
 
-  | Değişken | Varsayılan | Açıklama |
-  |---|---|---|
-  | `THUMB_MAX_PX` | `480` | Thumbnail'ın en uzun kenarı (px). Küçültür, asla büyütmez. |
-  | `THUMB_JPEG_QUALITY` | `82` | `.jpg/.jpeg` thumbnail kalitesi (PNG/WEBP kayıpsız yazılır). |
-
-  > Thumbnail, asıl dosyayla **aynı uzantıyı** korur (PNG → PNG). PNG ekran
-  > görüntüleri için daha küçük dosya isterseniz `THUMB_MAX_PX` değerini
-  > düşürebilirsiniz (örn. `360`).
-
-> `trooper/` (Caner'ın kişisel sayfası) bu yeniden yapımın parçası değildir;
-> ayrı tutulmuştur ve dilediğiniz gibi yanına ekleyebilirsiniz.
-
----
-
-## 8. Hızlı başlangıç özeti / Quick start
-
-```bash
-# 1) DB
-mysql -u root -p -e "CREATE DATABASE anka CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p anka < backend/anka.sql
-
-# 2) Backend
-cd backend && cp .env.example .env && npm install && npm start
-
-# 3) Frontend (yeni terminal)
-cd frontend && cp .env.example .env && npm install && npm run dev
-```
-
-Site: http://localhost:5173 · CMS: http://localhost:5173/admin · API: http://localhost:5000/api
-
-İyi çalışmalar, dostum! 🔥🦅
+- `npm run build` → `frontend/dist` içeriğini web sunucusuna yükleyin, ya da backend'de
+  `FRONTEND_DIR` ayarlayıp siteyi Node uygulamasının sunmasını sağlayın.
+- Backend'e `server.js`, `src/`, `scripts/`, `package.json`, `package-lock.json` ve `.env`
+  yüklenir; `node_modules` sunucuda kurulur. Sunucudaki `uploads/` klasörü canlı veridir:
+  güncelleme sırasında üzerine yazmayın. Backend artık ES modülleri
+  (`"type": "module"`) ve Express 5 kullanır: Node.js 20.19+ / 22.12+ önerilir.
+- Canlıda `NODE_ENV=production` ayarlayın (çerez yalnızca HTTPS ile gönderilir, 500 hata
+  ayrıntıları gizlenir).
