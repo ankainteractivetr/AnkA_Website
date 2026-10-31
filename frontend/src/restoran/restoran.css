@@ -1,0 +1,28 @@
+/* /restoran: its own light look, apart from the dark game-studio site. Only this page's files are scanned for classes. */
+@import "tailwindcss" source(none);
+@source "./";
+@source "../content/restoran.tr.js";
+
+@theme {
+  --color-cream: #faf7f2;
+  --color-paper: #ffffff;
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-line: #e7e0d5;
+  --color-accent: #c02d00;
+  --color-accent-dark: #9a2300;
+  --color-accent-soft: #fdeee6;
+
+  --font-sans: "Outfit", system-ui, sans-serif;
+}
+
+/* Page-wide defaults; components are styled with utility classes (see ./styles.js). */
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { background-color: var(--color-cream); color: var(--color-ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; overflow-wrap: anywhere; }
+  ::selection { background: var(--color-accent-soft); color: var(--color-ink); }
+  :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 3px; border-radius: 4px; }
+  summary { cursor: pointer; }
+  summary::-webkit-details-marker { display: none; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+}

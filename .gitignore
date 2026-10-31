@@ -14,6 +14,8 @@ node_modules/
 .env.*.local
 **/.env
 **/.env.local
+.env.production
+**/.env.production
 # Keep the templates tracked:
 !.env.example
 !**/.env.example

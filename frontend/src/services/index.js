@@ -4,6 +4,7 @@ import { ApiResource } from './ApiResource';
 import { AuthService } from './AuthService';
 import { BrowserLanguage } from './BrowserLanguage';
 import { CachedResource } from './CachedResource';
+import { DocumentHead } from './DocumentHead';
 import { ContactService } from './ContactService';
 import { HttpClient } from './HttpClient';
 import { IdleScheduler } from './IdleScheduler';
@@ -39,6 +40,7 @@ export const fullImageQueue = new BackgroundImageQueue(pageLoading, idleSchedule
 export const languageStore = new LanguageStore('anka_lang', SITE_LANGUAGES);
 // First visit (no saved choice): Turkish browsers get the Turkish site, every other language the English one.
 export const browserLanguage = new BrowserLanguage(SITE_LANGUAGES, 'en');
+export const documentHead = new DocumentHead(document);
 
 /** CMS endpoints, used only inside /admin. */
 export const admin = Object.freeze({

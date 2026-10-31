@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- /restoran is its own page (vite.config.js, .htaccess): these tags reach WhatsApp, Facebook and search engines without JavaScript. -->
+    <title>Restoranlar için QR Menü ve Online Sipariş | AnkA Interactive</title>
+    <meta name="description" content="Restoran ve kafeler için yönetmeliğe uygun QR menülü web sitesi, komisyonsuz online sipariş ve kasa uygulaması. Ankara merkezli. Ücretsiz analiz isteyin." />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="theme-color" content="#faf7f2" />
+    <link rel="canonical" href="https://www.ankainteractive.com/restoran" />
+
+    <!-- Link previews (WhatsApp, Instagram, Facebook, X …) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="tr_TR" />
+    <meta property="og:site_name" content="AnkA Interactive" />
+    <meta property="og:title" content="Restoranınız için Web Sitesi, Online Sipariş ve Kasa" />
+    <meta property="og:description" content="Yönetmeliğe uygun QR menülü web sitesi, komisyonsuz online sipariş ve kasa uygulaması. Ücretsiz analiz için WhatsApp'tan yazın." />
+    <meta property="og:url" content="https://www.ankainteractive.com/restoran" />
+    <meta property="og:image" content="https://www.ankainteractive.com/og-restoran.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Restoranlar için web sitesi, online sipariş ve kasa — AnkA Interactive" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "AnkA Interactive",
+        "url": "https://www.ankainteractive.com/restoran",
+        "description": "Restoran ve kafeler için QR menülü web sitesi, online sipariş ve kasa uygulaması.",
+        "areaServed": ["Ankara", "Denizli", "Türkiye"],
+        "telephone": "+90 538 932 57 85",
+        "email": "contact@ankainteractive.com",
+        "address": { "@type": "PostalAddress", "addressLocality": "Ankara", "addressCountry": "TR" }
+    }
+    </script>
+
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Loaded without blocking the first paint: the prerendered text shows in the fallback font, then swaps to Outfit. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"></noscript>
+</head>
+<body>
+    <!-- Filled at build time with the rendered page (scripts/prerender-restoran.mjs), so it reads without JavaScript too. -->
+    <div id="root"></div>
+    <script type="module" src="/src/restoran/main.jsx"></script>
+</body>
+</html>

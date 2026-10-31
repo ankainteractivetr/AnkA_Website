@@ -11,6 +11,7 @@
     "dev": "concurrently -n api,web -c red,blue \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
+    "test": "npm --prefix frontend test",
     "start": "npm --prefix backend start"
   },
   "devDependencies": {
