@@ -26,9 +26,19 @@ Options -Indexes
     # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     # RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
     #
-    # non-www -> www
-    # RewriteCond %{HTTP_HOST} !^www\. [NC]
-    # RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # ankainteractive.com -> www (canonical addresses, sitemap and link previews all use www).
+    # Only the bare domain: subdomains such as api.ankainteractive.com are never redirected.
+    RewriteCond %{HTTP_HOST} ^ankainteractive\.com$ [NC]
+    RewriteRule ^ https://www.ankainteractive.com%{REQUEST_URI} [L,R=301]
+
+    # --- Pages with their own HTML entry (own title/description/OG tags without JS) ---
+    # /restoran is the one canonical address: /restoran/ and /restoran.html go there,
+    # and /restoran is served from restoran.html (a file, not a folder, so no DirectorySlash
+    # redirect). THE_REQUEST matches only what the browser asked for, never the internal rewrite.
+    RewriteRule ^restoran/$ /restoran [L,R=301]
+    RewriteCond %{THE_REQUEST} \s/restoran\.html[\s?]
+    RewriteRule ^restoran\.html$ /restoran [L,R=301]
+    RewriteRule ^restoran$ restoran.html [L]
 
     # --- SPA fallback ---
     # If the request maps to a real file or directory, serve it as-is.

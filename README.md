@@ -129,6 +129,7 @@ CMS oturum çerezi CORS ayarı gerektirmez.
 ```bash
 npm run lint     # backend + frontend
 npm run build    # frontend/dist
+npm test         # birim testleri (node:test)
 npm start        # backend (canlı)
 ```
 
@@ -159,6 +160,40 @@ CMS ile yönetebilecekleriniz:
 
 Uzun metinler küçük bir işaretleme destekler: `[etiket](https://...)` link, `**kalın**`,
 `*italik*` ve paragraf için boş satır.
+
+## Restoran sayfası (`/restoran`)
+
+Restoran ve kafelere yönelik Türkçe, mobil öncelikli landing page. Ana sitenin parçası değil,
+**ayrı bir HTML giriş noktası**: `frontend/restoran.html` (Vite'ın ikinci `input`'u). Böylece
+başlık, açıklama, OG etiketleri ve JSON-LD ham HTML'de durur; WhatsApp/Facebook önizlemeleri
+JavaScript çalıştırmadan doğru başlığı ve `og-restoran.jpg` görselini gösterir.
+
+- **Metinler ve paketler:** `frontend/src/content/restoran.tr.js` (bileşenlere dokunmadan düzenlenir).
+  Meta etiketleri `frontend/restoran.html` içinde.
+- **Adres:** `/restoran` 200 döner; `/restoran/` ve `/restoran.html` 301 ile `/restoran`'a gider.
+  Kurallar `public/.htaccess` (Apache/LiteSpeed), `FrontendRoutes.js` (Node) ve `vite.config.js`
+  (dev/preview) içinde.
+- **Yer tutucular:** doldurulmamış bilgiler `TODO_CANER_…` biçimindedir. Yayından önce şu komut boş dönmeli
+  (build çıktısı dahil):
+
+  ```bash
+  grep -rn TODO_CANER --exclude-dir=node_modules --exclude='*restoran-brief.md' --exclude=README.md .
+  ```
+
+- **Prerender:** `npm run build` sayfayı `scripts/prerender-restoran.mjs` ile HTML olarak `dist/restoran.html` içine
+  yazar; içerik JavaScript beklemeden görünür, React sonra onu devralır (hydrate).
+- **Testler:** hesaplayıcı ve WhatsApp linki `node:test` ile test edilir: `npm test`.
+- **CTA ölçümü:** her buton/link `data-cta="hero-whatsapp"` gibi bir tanımlayıcı taşır.
+
+### Kampanya linkleri (UTM)
+
+Ziyaretlerin nereden geldiğini (analytics kurulana kadar hosting erişim loglarından) ayırmak için:
+
+| Kanal | Link |
+|---|---|
+| Broşür QR | `https://www.ankainteractive.com/restoran?utm_source=brosur&utm_medium=qr&utm_campaign=restoran` |
+| WhatsApp mesajı | `https://www.ankainteractive.com/restoran?utm_source=whatsapp&utm_medium=dm&utm_campaign=restoran` |
+| Instagram bio | `https://www.ankainteractive.com/restoran?utm_source=instagram&utm_medium=bio&utm_campaign=restoran` |
 
 ## API
 

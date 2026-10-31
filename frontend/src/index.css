@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* /restoran has its own stylesheet (src/restoran/restoran.css). */
+@source not "./restoran";
 
 /* Design tokens: every colour, font, shadow and animation the site uses, as Tailwind theme variables. */
 @theme {
